@@ -6,7 +6,7 @@ CPA の管理画面に統計、料金計算、アカウント・API Key 管理�
 
 ## Docker Compose
 
-Docker Engine と Docker Compose v2 を用意してください。amd64 / arm64 に対応しています。
+Docker Engine 27+ と Docker Compose v2 以降を用意してください。amd64 / arm64 に対応しています。
 
 ```bash
 mkdir -p cliproxyapi && cd cliproxyapi
@@ -27,5 +27,11 @@ docker compose up -d
 イメージは `ghcr.io/desuwadev/cliproxyapi:v2026.9.1` です。[Compose](docker-compose.yml) と[設定例](config.docker.example.yaml)を参照してください。`config.yaml`、`auths/`、統計と設定を保存する `data/`、導入済み `plugins/` を保持してください。
 
 更新は `.env` の `CLI_PROXY_IMAGE` を希望するタグに設定し、`docker compose pull && docker compose up -d` を実行します。`latest` は安定版を追跡します。
+
+IPv6-only VPS に対応し、IPv4／IPv6 のポート公開とコンテナーの IPv6 通信が初期状態で有効です。URL は `http://[IPv6アドレス]:8317/management.html` の形式にします。ホスト側でもレジストリと上流への IPv6 接続と名前解決が必要です。IPv4 のみの宛先にはプロキシまたは NAT64/DNS64 が必要です。以前の `.env` に `CLI_PROXY_BIND=0.0.0.0` や `CLI_PROXY_OAUTH_BIND=0.0.0.0` があれば削除してください。IPv6 を無効にしたホストでは `CLI_PROXY_IPV6=false` を設定できます。
+
+コンテナーはホストの `/etc/hosts` を継承しません。GitHub 用の IPv6 中継アドレスを設定している場合、ローカルの `docker-compose.override.yml` の `services.cli-proxy-api.extra_hosts` に必要な対応を追加してください。イメージの取得にはホストのネットワーク設定が使われます。
+
+既存環境のネットワーク設定を切り替える場合、Compose 更新後に `docker compose down && docker compose up -d` を実行してください。マウントしたディレクトリーのデータは保持されます。
 
 バージョンは `v年.月.修訂番号`、タグの push 時だけ Actions がネイティブ x86-64 / ARM64 ビルドを実行します。元の著作権表示と MIT ライセンスを保持しています。[上流プロジェクト](https://github.com/router-for-me/CLIProxyAPI)。

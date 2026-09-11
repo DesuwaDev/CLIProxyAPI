@@ -6,7 +6,7 @@ This fork includes usage/cost statistics, account and key controls, pricing, dia
 
 ## Docker Compose
 
-Requires Docker Engine and Docker Compose v2. The image supports native `amd64` and `arm64`.
+Requires Docker Engine 27+ and Docker Compose v2 or later. The image supports native `amd64` and `arm64`.
 
 ```bash
 mkdir -p cliproxyapi && cd cliproxyapi
@@ -29,6 +29,12 @@ docker compose logs --tail=100 -f
 - The versioned image is `ghcr.io/desuwadev/cliproxyapi:v2026.9.1`; Docker selects the architecture automatically.
 
 [Compose file](docker-compose.yml) · [Minimal Docker config](config.docker.example.yaml) · [Full config reference](config.example.yaml)
+
+For IPv6-only VPS hosts, Compose publishes both IPv4/IPv6 ports and enables container IPv6 egress by default. Use brackets in URLs: `http://[YOUR_IPV6_ADDRESS]:8317/management.html`. The host still needs working IPv6 DNS/connectivity to registries and upstream services; IPv4-only destinations need a proxy or NAT64/DNS64. Remove any old `CLI_PROXY_BIND=0.0.0.0` or `CLI_PROXY_OAUTH_BIND=0.0.0.0` overrides to restore dual-stack listeners. Set `CLI_PROXY_IPV6=false` only on hosts with IPv6 disabled.
+
+Containers do not inherit the host's `/etc/hosts`. If the host uses custom IPv6 relay entries for GitHub, add the required mappings under `services.cli-proxy-api.extra_hosts` in a local `docker-compose.override.yml`, using your own relay addresses. Image pulls use the host's network configuration.
+
+For an existing deployment, apply this network change with `docker compose down && docker compose up -d` after updating Compose. Data in the mounted directories is retained.
 
 ## Updates and persistent data
 

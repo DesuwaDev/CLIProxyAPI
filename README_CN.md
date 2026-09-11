@@ -6,7 +6,7 @@
 
 ## Docker Compose 部署
 
-先安装 Docker Engine 和 Docker Compose v2。镜像支持 `amd64`、`arm64`，Docker 自动选择架构。
+先安装 Docker Engine 27+ 和 Docker Compose v2 或更新版本。镜像支持 `amd64`、`arm64`，Docker 自动选择架构。
 
 **1. 下载本版本的部署文件**
 
@@ -37,6 +37,12 @@ docker compose logs --tail=100 -f
 可在面板中上传已有 OAuth 账号文件，也可发起 OAuth 登录。Compose 默认开放全部回调端口：Codex `1455`、Gemini `8085`、Claude `54545`、Antigravity `51121`、iFlow `11451`，无需取消注释。远程服务器登录时，浏览器的 localhost 回调仍需通过端口转发到达服务器，或使用面板提供的手动提交回调功能。
 
 镜像：`ghcr.io/desuwadev/cliproxyapi:v2026.9.1`。统计与管理默认可用，账号自动处置、请求审查和每账号指纹策略仍需明确开启。
+
+**IPv6-only VPS：** Compose 默认同时开放 IPv4／IPv6 端口，并为容器启用 IPv6 出网。IPv6 地址访问时加方括号，例如 `http://[你的IPv6地址]:8317/management.html`。宿主机仍需能解析并通过 IPv6 访问镜像仓库和上游；仅提供 IPv4 的目标需要可用的代理或 NAT64/DNS64。若旧 `.env` 设置了 `CLI_PROXY_BIND=0.0.0.0` 或 `CLI_PROXY_OAUTH_BIND=0.0.0.0`，删除对应设置才能恢复双栈监听。完全禁用 IPv6 的主机可设置 `CLI_PROXY_IPV6=false`。
+
+如果宿主机依靠 `/etc/hosts` 中的 IPv6 转发地址访问 GitHub，容器不会继承这些映射。可在本地新建 `docker-compose.override.yml`，通过 `services.cli-proxy-api.extra_hosts` 补充容器需要的域名映射，例如 `api.github.com=你实际使用的IPv6转发地址`。镜像拉取则使用宿主机的网络配置。
+
+已有部署切换到这个网络配置时，更新 Compose 后执行 `docker compose down && docker compose up -d`，重建网络即可；上述目录中的数据会保留。
 
 [直接查看 Compose](docker-compose.yml) · [精简部署配置](config.docker.example.yaml) · [完整配置参考](config.example.yaml)
 
