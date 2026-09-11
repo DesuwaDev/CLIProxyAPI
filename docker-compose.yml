@@ -6,8 +6,8 @@ services:
     environment:
       TZ: ${TZ:-Asia/Shanghai}
     ports:
-      # Omit the host address by default to publish on both IPv4 and IPv6.
-      - "${CLI_PROXY_BIND:+${CLI_PROXY_BIND}:}8317:8317"
+      # Let a host reverse proxy expose the API and panel over HTTPS.
+      - "${CLI_PROXY_BIND:-127.0.0.1}:8317:8317"
       # OAuth callback ports are published by default.
       - "${CLI_PROXY_OAUTH_BIND:+${CLI_PROXY_OAUTH_BIND}:}1455:1455"   # Codex
       - "${CLI_PROXY_OAUTH_BIND:+${CLI_PROXY_OAUTH_BIND}:}8085:8085"   # Gemini

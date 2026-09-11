@@ -1,3 +1,4 @@
+# Listen on container interfaces; restrict host access in Compose, not here.
 host: ""
 port: 8317
 remote-management:
