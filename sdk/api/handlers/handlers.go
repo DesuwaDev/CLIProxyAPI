@@ -487,6 +487,7 @@ func (h *BaseAPIHandler) GetContextWithCancel(handler interfaces.APIHandler, c *
 			parentCtx = logging.WithRequestID(parentCtx, requestID)
 		}
 	}
+	parentCtx = logging.WithObservationID(parentCtx, logging.ObservationID(requestCtx))
 	newCtx, cancel := context.WithCancel(parentCtx)
 
 	endpoint := ""

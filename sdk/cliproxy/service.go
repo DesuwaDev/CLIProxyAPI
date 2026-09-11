@@ -11,6 +11,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/api"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/home"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/homeplugins"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/native"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/pluginhost"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/watcher"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/wsrelay"
@@ -61,6 +62,9 @@ type Service struct {
 
 	// server is the HTTP API server instance.
 	server *api.Server
+
+	// nativeManagement owns optional in-process management modules.
+	nativeManagement *native.Runtime
 
 	// pprofServer manages the optional pprof HTTP debug server.
 	pprofServer *pprofServer

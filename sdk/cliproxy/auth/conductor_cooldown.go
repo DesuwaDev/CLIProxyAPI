@@ -732,6 +732,9 @@ func cooldownReason(statusMessage string, quota QuotaState, lastErr *Error) stri
 
 // MarkResult records an execution result and notifies hooks.
 func (m *Manager) MarkResult(ctx context.Context, result Result) {
+	if result.Error != nil && result.Error.Code == localAdmissionCode {
+		return
+	}
 	if result.AuthID == "" {
 		return
 	}
@@ -1426,6 +1429,9 @@ func isRequestScopedError(err error) bool {
 func resultErrorFromError(err error) *Error {
 	if err == nil {
 		return nil
+	}
+	if isLocalAdmissionError(err) {
+		return &Error{Code: localAdmissionCode, Message: err.Error(), HTTPStatus: statusCodeFromError(err)}
 	}
 	var sourceErr *Error
 	var resultErr *Error

@@ -14,6 +14,7 @@ import (
 )
 
 type serverOptionConfig struct {
+	managementExtension   ManagementExtension
 	extraMiddleware       []gin.HandlerFunc
 	engineConfigurator    func(*gin.Engine)
 	routerConfigurator    func(*gin.Engine, *handlers.BaseAPIHandler, *config.Config)
@@ -31,6 +32,17 @@ type serverOptionConfig struct {
 
 // ServerOption customises HTTP server construction.
 type ServerOption func(*serverOptionConfig)
+
+// ManagementExtension adds built-in management routes behind the existing auth gate.
+type ManagementExtension interface {
+	Register(*gin.RouterGroup)
+	ServePanel(*gin.Context)
+}
+
+// WithManagementExtension installs an in-process management extension.
+func WithManagementExtension(extension ManagementExtension) ServerOption {
+	return func(cfg *serverOptionConfig) { cfg.managementExtension = extension }
+}
 
 func defaultRequestLoggerFactory(cfg *config.Config, configPath string) logging.RequestLogger {
 	configDir := filepath.Dir(configPath)

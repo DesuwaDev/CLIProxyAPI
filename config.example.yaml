@@ -125,6 +125,24 @@ error-logs-max-files: 10
 # When false, disable in-memory usage statistics aggregation
 usage-statistics-enabled: false
 
+# Optional management modules compiled into this fork (no sidecar or extra port).
+# Enable and restart CPA, then open /management.html with the existing management key.
+native-management:
+  enabled: false
+  database: "data/native-management.sqlite" # Relative to this configuration file
+  retention-days: 90
+  # Initial defaults. UI module switches are persisted in SQLite and take precedence.
+  modules:
+    history: true
+    pricing: true
+    accounts: true
+    diagnostics: true
+    limits: true
+    fingerprint: true
+    headers: true # Per-account Codex OAuth header normalization; account policies default off
+    inventory: true # Persistent account/key usage and access profiles
+    risk: true # Management capability; request-audit mode defaults to off
+
 # How long (in seconds) usage queue items are retained in memory for the Management API.
 # The local Redis RESP usage output is disabled.
 # Default: 60. Max: 3600.

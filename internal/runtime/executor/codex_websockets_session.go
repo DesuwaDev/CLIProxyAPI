@@ -47,7 +47,8 @@ func (c *websocketConnectionCloser) Close() error {
 }
 
 type codexWebsocketSession struct {
-	sessionID string
+	sessionID        string
+	outboundIdentity string
 
 	reqMu sync.Mutex
 
@@ -814,5 +815,27 @@ func CloseCodexWebsocketSessionsForAuthID(authID string, reason string) {
 
 	for i := range toClose {
 		closeCodexWebsocketSession(toClose[i], reason)
+	}
+}
+
+// reconcileOutboundIdentity is called while reqMu is held. A mode change must not
+// reuse a handshake carrying the previous identity. Required incremental turns
+// receive the existing replay-required signal and keep normal replay semantics.
+func (e *CodexWebsocketsExecutor) reconcileOutboundIdentity(ctx context.Context, sess *codexWebsocketSession, headers http.Header) {
+	if sess == nil {
+		return
+	}
+	identity := ""
+	if cliproxyexecutor.HasOutboundIdentityTransform(ctx) {
+		identity = headers.Get("X-Codex-Installation-Id") + "/" + headers.Get("Session-Id") + "/" + headers.Get("Thread-Id")
+	}
+	identity += cliproxyexecutor.OutboundHeaderIdentity(ctx, headers)
+	sess.connMu.Lock()
+	changed := sess.outboundIdentity != identity
+	sess.outboundIdentity = identity
+	conn := sess.conn
+	sess.connMu.Unlock()
+	if changed && conn != nil {
+		e.invalidateUpstreamConnWithoutDisconnectNotify(sess, conn, "outbound_identity_changed", nil)
 	}
 }

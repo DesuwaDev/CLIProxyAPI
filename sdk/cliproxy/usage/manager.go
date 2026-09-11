@@ -67,15 +67,18 @@ type Failure struct {
 
 // Detail holds the token usage breakdown.
 type Detail struct {
-	InputTokens         int64
-	OutputTokens        int64
-	ReasoningTokens     int64
-	CachedTokens        int64
-	CacheReadTokens     int64
-	CacheCreationTokens int64
-	TotalTokens         int64
-	TokenBreakdown      TokenBreakdown
-	ResponseServiceTier string
+	CacheCreation5mTokens    int64
+	CacheCreation1hTokens    int64
+	CacheCreationTTLObserved bool
+	InputTokens              int64
+	OutputTokens             int64
+	ReasoningTokens          int64
+	CachedTokens             int64
+	CacheReadTokens          int64
+	CacheCreationTokens      int64
+	TotalTokens              int64
+	TokenBreakdown           TokenBreakdown
+	ResponseServiceTier      string
 }
 
 type requestedModelAliasContextKey struct{}
@@ -257,6 +260,7 @@ type Manager struct {
 	cond   *sync.Cond
 	queue  []queueItem
 	closed bool
+	done   chan struct{}
 
 	pluginsMu sync.RWMutex
 	plugins   []Plugin
@@ -265,7 +269,7 @@ type Manager struct {
 
 // NewManager constructs a manager with a buffered queue.
 func NewManager(buffer int) *Manager {
-	m := &Manager{}
+	m := &Manager{done: make(chan struct{})}
 	m.cond = sync.NewCond(&m.mu)
 	return m
 }
@@ -290,6 +294,7 @@ func (m *Manager) Stop() {
 	if m == nil {
 		return
 	}
+	m.Start(context.Background())
 	m.stopOnce.Do(func() {
 		if m.cancel != nil {
 			m.cancel()
@@ -354,6 +359,7 @@ func (m *Manager) Publish(ctx context.Context, record Record) {
 }
 
 func (m *Manager) run(ctx context.Context) {
+	defer close(m.done)
 	for {
 		m.mu.Lock()
 		for !m.closed && len(m.queue) == 0 {
@@ -367,6 +373,20 @@ func (m *Manager) run(ctx context.Context) {
 		m.queue = m.queue[1:]
 		m.mu.Unlock()
 		m.dispatch(item)
+	}
+}
+
+// Wait waits for Stop to drain all queued events and finish sink delivery.
+// Stop retains its non-blocking behavior for existing callers.
+func (m *Manager) Wait(ctx context.Context) error {
+	if m == nil {
+		return nil
+	}
+	select {
+	case <-m.done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 

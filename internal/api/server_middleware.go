@@ -172,7 +172,7 @@ func accessAuthMiddleware(manager *sdkaccess.Manager, realtimeError bool) gin.Ha
 					c.Set("accessMetadata", result.Metadata)
 				}
 			}
-			c.Next()
+			continueAuthenticated(c)
 			return
 		}
 

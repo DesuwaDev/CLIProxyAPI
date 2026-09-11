@@ -1,0 +1,778 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+.histogram {
+  display: grid;
+  gap: 12px;
+  > div {
+    display: grid;
+    grid-template-columns: 130px 1fr 60px;
+    gap: 12px;
+    align-items: center;
+  }
+  meter {
+    width: 100%;
+    height: 18px;
+    accent-color: var(--viz-success);
+  }
+  strong {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+.copyValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  code {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  button {
+    flex-shrink: 0;
+  }
+}
+.columnPicker {
+  margin-bottom: 16px;
+  summary {
+    cursor: pointer;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+  }
+}
+.hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  label {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .input,
+  select {
+    width: auto;
+  }
+  button:last-child {
+    margin-left: auto;
+  }
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.metric {
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  p {
+    margin: 0 0 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  strong {
+    display: block;
+    font-size: 27px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  small {
+    display: block;
+    color: var(--text-secondary);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+}
+.table {
+  overflow: auto;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  th,
+  td {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    padding: 13px 12px;
+  }
+  th {
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  td {
+    max-width: 340px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+.empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 32px;
+}
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.chart {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+.gridLine {
+  stroke: var(--border-color);
+}
+.success {
+  fill: var(--viz-success);
+}
+.failure {
+  fill: var(--viz-failure);
+}
+.chartLabel {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+.legend {
+  display: flex;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.editor {
+  width: 100%;
+  min-height: 300px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+}
+.moduleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.detail {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.compact {
+  margin: 24px 0;
+}
+.compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+}
+@media (max-width: 1100px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .moduleGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+  .metrics {
+    gap: 10px;
+  }
+  .metric {
+    padding: 14px;
+  }
+  .metric strong {
+    font-size: 23px;
+  }
+  .toolbar {
+    gap: 10px;
+  }
+}
+
+.controls {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  min-width: 0;
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+}
+.controlsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 20px;
+}
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.formGrid label,
+.fieldset > label,
+.endpointEditor label {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.formGrid input,
+.formGrid select {
+  min-width: 0;
+}
+.checkGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+  font-size: 13px;
+}
+.checkGrid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ruleRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.ruleRow > input:not([type='checkbox']) {
+  flex: 1;
+  min-width: 0;
+}
+.ruleRow code {
+  min-width: 110px;
+  overflow-wrap: anywhere;
+}
+.ruleRow label {
+  white-space: nowrap;
+}
+.endpointEditor {
+  border-top: 1px solid var(--border-color);
+  padding: 22px 0 4px;
+  margin-top: 16px;
+}
+.endpointEditor .toolbar {
+  margin-bottom: 18px;
+}
+.workspaceBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.workspaceBar > button:last-child {
+  margin-left: auto;
+}
+.tabs,
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+.tabs button,
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 9px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+.tabs .tabActive,
+.segmented button[aria-pressed='true'] {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  box-shadow: 0 1px 5px #00000012;
+  font-weight: 600;
+}
+.tabs button:focus-visible,
+.segmented button:focus-visible {
+  outline: 2px solid var(--viz-success);
+  outline-offset: 2px;
+}
+.statusPill {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  white-space: normal;
+}
+.statusPill[data-tone='success'] {
+  color: var(--viz-success);
+  background: color-mix(in srgb, var(--viz-success) 10%, transparent);
+}
+.statusPill[data-tone='danger'] {
+  color: var(--viz-failure);
+  background: color-mix(in srgb, var(--viz-failure) 10%, transparent);
+}
+.flow {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.inlineStats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  align-items: center;
+}
+.inlineStats > span {
+  color: var(--text-secondary);
+}
+.inlineStats strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.detailPanel {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  font-size: 13px;
+}
+.detailGrid dt {
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.detailGrid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.profileEditor {
+  margin-top: 24px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+.accountUsage {
+  padding: 12px 0;
+  display: grid;
+  gap: 9px;
+  border-bottom: 1px solid var(--border-color);
+}
+.accountMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 0;
+}
+.accountMetrics span {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: block;
+}
+.accountMetrics strong {
+  font-size: 15px;
+  display: block;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.accountFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.annotation {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.tags span {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.keySummary {
+  margin-top: 8px;
+  width: 100%;
+}
+.keySummary > small {
+  display: block;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.keySummary .accountMetrics {
+  max-width: 420px;
+}
+.keySummary .accountMetrics strong {
+  font-size: 13px;
+}
+.forecastGrid {
+  display: grid;
+  gap: 10px;
+}
+.forecast {
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  padding: 12px;
+  background: var(--bg-secondary);
+}
+.forecast > meter,
+.budgetBar > meter,
+.rankRow meter {
+  width: 100%;
+  height: 12px;
+  accent-color: var(--viz-success);
+}
+.forecast > small {
+  font-size: 10px;
+  color: var(--text-secondary);
+  display: block;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.forecastValues {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.forecastValues strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.budgetBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.rowSub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric[data-accent] {
+  border-top: 3px solid var(--border-color);
+}
+.metric[data-accent='blue'] {
+  border-top-color: #578bfa;
+}
+.metric[data-accent='success'] {
+  border-top-color: var(--viz-success);
+}
+.metric[data-accent='danger'] {
+  border-top-color: var(--viz-failure);
+}
+.metric[data-accent='purple'] {
+  border-top-color: #a17cf5;
+}
+.metric[data-accent='amber'] {
+  border-top-color: #d69c36;
+}
+.metric[data-accent] > strong {
+  font-size: clamp(22px, 2.4vw, 32px);
+  overflow-wrap: anywhere;
+}
+.insightGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 20px;
+}
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.quickMetrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 16px 22px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  gap: 14px;
+}
+.quickMetrics > div {
+  display: grid;
+  gap: 7px;
+  border-right: 1px solid var(--border-color);
+}
+.quickMetrics > div:last-child {
+  border: 0;
+}
+.quickMetrics span {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.quickMetrics strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.notice {
+  background: color-mix(in srgb, #d69c36 8%, var(--bg-primary));
+  border: 1px solid color-mix(in srgb, #d69c36 35%, transparent);
+  border-radius: 9px;
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+}
+.chartLegend {
+  display: flex;
+  gap: 20px;
+  padding: 10px 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.chartLegend span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.chartLegend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.legendSuccess {
+  background: var(--viz-success);
+}
+.legendFailure {
+  background: var(--viz-failure);
+}
+.heroNumber {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+  margin: 10px 0 20px;
+  font-variant-numeric: tabular-nums;
+}
+.heroNumber small {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+.tokenComposition {
+  height: 12px;
+  display: flex;
+  gap: 3px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.tokenComposition span:first-child {
+  background: #578bfa;
+}
+.tokenComposition span:last-child {
+  background: #a17cf5;
+}
+.tokenBreakdown {
+  display: grid;
+  gap: 13px;
+  margin: 22px 0;
+}
+.tokenBreakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+.tokenBreakdown dt {
+  color: var(--text-secondary);
+}
+.tokenBreakdown dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.rankList {
+  display: grid;
+  gap: 18px;
+  padding: 5px 0;
+}
+.rankRow {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.rankRow .accountFoot {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.rankRow strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+.rankRow small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.rankNumber {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding-top: 3px;
+}
+.rankRow:hover strong {
+  text-decoration: underline;
+}
+.performanceDetails {
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  border-radius: 12px;
+  display: grid;
+  gap: 20px;
+}
+.performanceDetails > summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.performanceDetails[open] > summary {
+  margin-bottom: 20px;
+}
+@media (max-width: 1100px) {
+  .insightGrid {
+    grid-template-columns: 1fr;
+  }
+  .quickMetrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .formGrid,
+  .checkGrid,
+  .twoColumns,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+  .quickMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px;
+  }
+  .tabs button {
+    padding: 8px 10px;
+  }
+  .ruleRow {
+    flex-wrap: wrap;
+  }
+  .ruleRow code {
+    min-width: 70px;
+  }
+  .detailPanel {
+    padding: 12px;
+  }
+  .accountMetrics {
+    gap: 7px;
+  }
+  .accountMetrics strong {
+    font-size: 13px;
+  }
+  .flow {
+    gap: 8px;
+    font-size: 12px;
+  }
+  .segmented button {
+    padding: 6px;
+    font-size: 11px;
+  }
+}

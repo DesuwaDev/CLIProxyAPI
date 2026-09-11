@@ -143,6 +143,11 @@ func ObserveMergedStreamUsage(buffer *StreamUsageBuffer, update usage.Detail) {
 // MergeStreamUsageDetail merges existing stream usage with a newer update.
 func MergeStreamUsageDetail(existing, update usage.Detail) usage.Detail {
 	merged := update
+	if !update.CacheCreationTTLObserved && existing.CacheCreationTTLObserved {
+		merged.CacheCreationTTLObserved = true
+		merged.CacheCreation5mTokens = existing.CacheCreation5mTokens
+		merged.CacheCreation1hTokens = existing.CacheCreation1hTokens
+	}
 	if merged.InputTokens == 0 && existing.InputTokens > 0 {
 		merged.InputTokens = existing.InputTokens
 	}

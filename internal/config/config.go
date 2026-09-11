@@ -31,6 +31,9 @@ type Config struct {
 	// Plugins configures dynamic plugin discovery and per-plugin settings.
 	Plugins PluginsConfig `yaml:"plugins" json:"plugins"`
 
+	// NativeManagement enables optional management features compiled into this binary.
+	NativeManagement NativeManagementConfig `yaml:"native-management" json:"native-management"`
+
 	// AuthDir is the directory where authentication token files are stored.
 	AuthDir string `yaml:"auth-dir" json:"-"`
 

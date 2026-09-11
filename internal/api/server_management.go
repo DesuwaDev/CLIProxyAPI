@@ -26,6 +26,9 @@ func (s *Server) registerManagementRoutes() {
 
 	mgmt := s.engine.Group("/v0/management")
 	mgmt.Use(s.managementAvailabilityMiddleware(), s.mgmt.Middleware())
+	if s.managementExtension != nil {
+		s.managementExtension.Register(mgmt)
+	}
 	{
 		mgmt.GET("/config", s.mgmt.GetConfig)
 		mgmt.GET("/config.yaml", s.mgmt.GetConfigYAML)
@@ -294,6 +297,10 @@ func (s *Server) serveManagementControlPanel(c *gin.Context) {
 	cfg := s.cfg
 	if cfg == nil || cfg.Home.Enabled || cfg.RemoteManagement.DisableControlPanel {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	if s.managementExtension != nil {
+		s.managementExtension.ServePanel(c)
 		return
 	}
 	filePath := managementasset.FilePath(s.configFilePath)

@@ -180,6 +180,12 @@ func extractErrorBody(err error) string {
 // If a rule matches, it returns (action, true).
 // If no rule matches, it returns ("", false).
 func matchRequestScopedErrorAction(auth *Auth, err error, cfg *internalconfig.Config) (string, bool) {
+	if isLocalAdmissionError(err) {
+		if isRequestStopError(err) {
+			return RequestScopedActionStop, true
+		}
+		return "", false
+	}
 	if err == nil {
 		return "", false
 	}
@@ -236,7 +242,7 @@ func matchRequestScopedErrorAction(auth *Auth, err error, cfg *internalconfig.Co
 }
 
 func applyRequestScopedActionToResult(action string, okAction bool, result *Result) {
-	if !okAction || result == nil || result.Error == nil {
+	if !okAction || result == nil || result.Error == nil || result.Error.Code == localAdmissionCode {
 		return
 	}
 	if action == RequestScopedActionStop || action == RequestScopedActionContinue {
