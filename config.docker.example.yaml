@@ -1,0 +1,17 @@
+host: ""
+port: 8317
+remote-management:
+  allow-remote: true
+  secret-key: "replace-with-a-long-management-key"
+  disable-control-panel: false
+  disable-auto-update-panel: true
+auth-dir: "~/.cli-proxy-api"
+api-keys:
+  - "replace-with-a-long-client-api-key"
+usage-statistics-enabled: true
+logging-to-file: false
+logs-max-total-size-mb: 100
+native-management:
+  enabled: true
+  database: "data/native-management.sqlite"
+  retention-days: 90

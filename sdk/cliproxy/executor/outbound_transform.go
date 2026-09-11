@@ -36,6 +36,11 @@ func WithOutboundHeaderTransform(ctx context.Context, fn OutboundHeaderTransform
 	return context.WithValue(ctx, outboundHeaderTransformKey{}, fn)
 }
 
+// OutboundHeaderTransformFrom returns the header transform attached to ctx, if any.
+func OutboundHeaderTransformFrom(ctx context.Context) OutboundHeaderTransform {
+	return headerTransform(ctx)
+}
+
 func headerTransform(ctx context.Context) OutboundHeaderTransform {
 	if ctx == nil {
 		return nil

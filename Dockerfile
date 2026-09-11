@@ -1,37 +1,35 @@
+# syntax=docker/dockerfile:1
+FROM oven/bun:1.3.14-slim AS frontend
+WORKDIR /ui
+COPY management-ui/package.json management-ui/bun.lock ./
+RUN bun install --frozen-lockfile
+COPY management-ui/ ./
+COPY VERSION /release-version
+ARG VERSION
+RUN VERSION="${VERSION:-v$(cat /release-version)}" bun --bun run build
+
 FROM golang:1.26-bookworm AS builder
-
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential git && rm -rf /var/lib/apt/lists/*
-
+WORKDIR /src
 COPY go.mod go.sum ./
-
 RUN go mod download
-
 COPY . .
-
-ARG VERSION=dev
+COPY --from=frontend /ui/dist/index.html ./internal/native/web/management.html
+ARG VERSION
 ARG COMMIT=none
 ARG BUILD_DATE=unknown
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=1 go build -trimpath -buildvcs=false \
+    -ldflags="-s -w -X main.Version=${VERSION:-v$(cat VERSION)} -X main.Commit=${COMMIT} -X main.BuildDate=${BUILD_DATE}" \
+    -o /out/CLIProxyAPI ./cmd/server
 
-RUN CGO_ENABLED=1 GOOS=linux go build -buildvcs=false -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.Commit=${COMMIT}' -X 'main.BuildDate=${BUILD_DATE}'" -o ./CLIProxyAPI ./cmd/server/
-
-FROM debian:bookworm
-
-RUN apt-get update && apt-get install -y --no-install-recommends tzdata ca-certificates && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir /CLIProxyAPI
-
-COPY --from=builder ./app/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
-
-COPY config.example.yaml /CLIProxyAPI/config.example.yaml
-
+FROM debian:bookworm-slim AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /CLIProxyAPI
-
-EXPOSE 8317
-
+COPY --from=builder /out/CLIProxyAPI ./CLIProxyAPI
+COPY config.docker.example.yaml config.example.yaml
+COPY LICENSE /usr/share/licenses/cliproxyapi/LICENSE
+COPY management-ui/LICENSE /usr/share/licenses/cliproxyapi/management-ui-LICENSE
 ENV TZ=Asia/Shanghai
-
-RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo "${TZ}" > /etc/timezone
-
+EXPOSE 8317
 CMD ["./CLIProxyAPI"]

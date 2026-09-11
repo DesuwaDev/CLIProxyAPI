@@ -25,6 +25,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/native/pricing"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/native/risk"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/native/storage"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/native/wire"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
 	log "github.com/sirupsen/logrus"
 )
@@ -42,6 +43,8 @@ type Runtime struct {
 	limits              *limits.Module
 	fingerprint         *fingerprint.Module
 	headers             *headers.Module
+	wire                *wire.Module
+	globalProxyURL      string
 	identityLookup      func(string) (Identity, bool)
 	diagnostics         *diagnostics.Module
 	db                  *sql.DB
@@ -113,6 +116,15 @@ func Open(cfg config.NativeManagementConfig, configPath string, snapshots func()
 	if err != nil {
 		return nil, err
 	}
+	wp, err := wire.New(db)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if !ok {
+			wp.Close()
+		}
+	}()
 	d, err := diagnostics.New(db)
 	if err != nil {
 		return nil, err
@@ -135,7 +147,7 @@ func Open(cfg config.NativeManagementConfig, configPath string, snapshots func()
 			guard.Close()
 		}
 	}()
-	r := &Runtime{inventory: directory, risk: guard, limits: l, fingerprint: fp, headers: hp, diagnostics: d, db: db, features: map[string]*feature{}, prices: p, accounts: a, done: make(chan struct{}), retention: cfg.RetentionDays}
+	r := &Runtime{inventory: directory, risk: guard, limits: l, fingerprint: fp, headers: hp, wire: wp, diagnostics: d, db: db, features: map[string]*feature{}, prices: p, accounts: a, done: make(chan struct{}), retention: cfg.RetentionDays}
 	h.AliasUpdater = func(ctx context.Context, key, label string) error {
 		p := directory.Profile("client", key)
 		p.Name = label
@@ -143,7 +155,7 @@ func Open(cfg config.NativeManagementConfig, configPath string, snapshots func()
 	}
 	guard.Enabled = func() bool { return r.enabled("risk") }
 	// This is the only feature registry. Adding/removing a module does not change the host.
-	for _, f := range []*feature{{Name: "history", register: h.Register}, {Name: "pricing", register: p.Register}, {Name: "accounts", register: a.Register}, {Name: "diagnostics", register: d.Register}, {Name: "limits", register: l.Register}, {Name: "fingerprint", register: fp.Register}, {Name: "headers", register: hp.Register, changed: hp.PauseVersionSync}, {Name: "risk", register: guard.Register}, {Name: "inventory", register: directory.Register}} {
+	for _, f := range []*feature{{Name: "history", register: h.Register}, {Name: "pricing", register: p.Register}, {Name: "accounts", register: a.Register}, {Name: "diagnostics", register: d.Register}, {Name: "limits", register: l.Register}, {Name: "fingerprint", register: fp.Register}, {Name: "headers", register: hp.Register, changed: hp.PauseVersionSync}, {Name: "wire", register: wp.Register, changed: wp.SetEnabled}, {Name: "risk", register: guard.Register}, {Name: "inventory", register: directory.Register}} {
 		enabled, exists := cfg.Modules[f.Name]
 		if !exists {
 			enabled = true
@@ -233,7 +245,7 @@ func (r *Runtime) Register(g *gin.RouterGroup) {
 		r.mu.RLock()
 		defer r.mu.RUnlock()
 		items := []feature{}
-		for _, name := range []string{"history", "pricing", "accounts", "diagnostics", "limits", "fingerprint", "headers", "risk", "inventory"} {
+		for _, name := range []string{"history", "pricing", "accounts", "diagnostics", "limits", "fingerprint", "headers", "wire", "risk", "inventory"} {
 			if f := r.features[name]; f != nil {
 				items = append(items, *f)
 			}
@@ -340,6 +352,7 @@ func (r *Runtime) Close() error {
 	<-r.versionDone
 	r.risk.Close()
 	r.diagnostics.Close()
+	r.wire.Close()
 	return r.db.Close()
 }
 

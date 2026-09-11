@@ -31,7 +31,7 @@ func (s *Service) startNativeManagement() error {
 			if a != nil && (a.Index == value || a.ID == value || a.FileName == value) {
 				kind, _ := a.AccountInfo()
 				codexOAuth := a.Provider == "codex" && kind == "oauth"
-				return native.Identity{ID: a.Index, Provider: a.Provider, Fingerprint: codexOAuth, Headers: codexOAuth}, true
+				return native.Identity{ID: a.Index, Provider: a.Provider, Fingerprint: codexOAuth, Headers: codexOAuth, Wire: codexOAuth}, true
 			}
 		}
 		return native.Identity{}, false
@@ -50,6 +50,7 @@ func (s *Service) startNativeManagement() error {
 		}
 		return out
 	})
+	runtime.SetGlobalProxyURL(strings.TrimSpace(s.cfg.ProxyURL))
 	s.coreManager.SetExecutionPolicy(runtime)
 	s.nativeManagement = runtime
 	s.serverOptions = append(s.serverOptions, api.WithManagementExtension(runtime), api.WithMiddleware(runtime.Middleware()), api.WithAuthenticatedMiddleware(runtime.CallerMiddleware()))

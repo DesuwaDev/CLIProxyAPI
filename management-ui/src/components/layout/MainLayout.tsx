@@ -669,7 +669,10 @@ export function MainLayout() {
       labelKey: 'nav_groups.control',
       items: [
         ...(native.status
-          ? [{ path: '/native-modules', labelKey: 'native.modules', icon: sidebarIcons.config }]
+          ? [
+              { path: '/codex-disguise', labelKey: 'native.disguise_nav', icon: sidebarIcons.oauth },
+              { path: '/native-modules', labelKey: 'native.modules', icon: sidebarIcons.config },
+            ]
           : []),
         {
           path: '/config',

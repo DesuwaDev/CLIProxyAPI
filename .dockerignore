@@ -1,41 +1,27 @@
-# Git and GitHub folders
-.git
-.github
-
-# Docker and CI/CD related files
-docker-compose.yml
-.dockerignore
-.gitignore
-.goreleaser.yml
-Dockerfile
-
-# Documentation and license
-docs
-README.md
-README_CN.md
-LICENSE
-
-# Runtime data folders (should be mounted as volumes)
-auths
-logs
-conv
-config.yaml
-
-# Development/editor
-bin
-.vscode
-.claude
-.codex
-.codex-worktrees
-.gemini
-.serena
-.agent
-.agents
-.antigravitycli
-.opencode
-.idea
-.junie
-.worktrees
-.bmad
-_bmad
-_bmad-output
+# Only build inputs enter the context; account files, logs and local tools stay out.
+**
+!go.mod
+!go.sum
+!VERSION
+!LICENSE
+!Dockerfile
+!config.example.yaml
+!config.docker.example.yaml
+!cmd/
+!cmd/server/
+!cmd/server/**
+!internal/
+!internal/**
+!sdk/
+!sdk/**
+!management-ui/
+!management-ui/**
+management-ui/node_modules/
+management-ui/dist/
+management-ui/.git/
+management-ui/.github/
+management-ui/tests/
+**/AGENTS.md
+**/CLAUDE.md
+**/*.exe
+**/*.log

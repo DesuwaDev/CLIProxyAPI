@@ -12,6 +12,7 @@ import { useNativeManagement } from './context';
 import { useNativeQuery } from './useNativeQuery';
 import { ProfileEditor } from './ProfileEditor';
 import { HeaderPolicyEditor } from './HeaderPolicyEditor';
+import { WirePolicyEditor } from './WirePolicyEditor';
 import { QueryState } from './components';
 import styles from './NativeManagement.module.scss';
 
@@ -26,7 +27,10 @@ export function CredentialControls({ scope = 'credential', target = '', disabled
   if (
     !enabled('inventory') &&
     !enabled('limits') &&
-    !(scope === 'credential' && (enabled('fingerprint') || enabled('headers')))
+    !(
+      scope === 'credential' &&
+      (enabled('fingerprint') || enabled('headers') || enabled('wire'))
+    )
   )
     return null;
   return (
@@ -182,6 +186,13 @@ function ControlEditor({ scope = 'credential', target = '', disabled }: Props) {
       {scope === 'credential' && enabled('headers') && query.data?.identity.headers && (
         <HeaderPolicyEditor
           key={query.data.identity.id}
+          target={query.data.identity.id}
+          disabled={disabled || busy}
+        />
+      )}
+      {scope === 'credential' && enabled('wire') && query.data?.identity.wire && (
+        <WirePolicyEditor
+          key={'wire' + query.data.identity.id}
           target={query.data.identity.id}
           disabled={disabled || busy}
         />

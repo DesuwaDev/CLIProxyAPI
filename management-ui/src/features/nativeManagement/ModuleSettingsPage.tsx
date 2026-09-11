@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { date, number } from './format';
 import { useState } from 'react';
@@ -52,6 +53,12 @@ export function ModuleSettingsPage() {
         ))}
       </div>
       {query.enabled('headers') && <CodexVersionEditor />}
+      {query.enabled('wire') && (
+        <Card title={t('native.disguise_title')}>
+          <p className={styles.hint}>{t('native.disguise_modules_link_hint')}</p>
+          <Link to="/codex-disguise">{t('native.disguise_open')}</Link>
+        </Card>
+      )}
       {query.status && (
         <Card
           title={t('native.storage')}

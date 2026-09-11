@@ -163,6 +163,14 @@
 .success {
   fill: var(--viz-success);
 }
+.stateOk {
+  color: var(--viz-success);
+  font-weight: 600;
+}
+.stateBad {
+  color: var(--viz-failure);
+  font-weight: 600;
+}
 .failure {
   fill: var(--viz-failure);
 }
