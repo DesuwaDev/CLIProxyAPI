@@ -7,12 +7,12 @@ services:
       TZ: ${TZ:-Asia/Shanghai}
     ports:
       - "${CLI_PROXY_BIND:-0.0.0.0}:8317:8317"
-      # Optional OAuth callback ports; enable only the provider you use.
-      # - "127.0.0.1:1455:1455"   # Codex
-      # - "127.0.0.1:8085:8085"   # Gemini
-      # - "127.0.0.1:54545:54545" # Claude
-      # - "127.0.0.1:51121:51121" # Antigravity
-      # - "127.0.0.1:11451:11451" # iFlow
+      # OAuth callback ports are published by default.
+      - "${CLI_PROXY_OAUTH_BIND:-0.0.0.0}:1455:1455"   # Codex
+      - "${CLI_PROXY_OAUTH_BIND:-0.0.0.0}:8085:8085"   # Gemini
+      - "${CLI_PROXY_OAUTH_BIND:-0.0.0.0}:54545:54545" # Claude
+      - "${CLI_PROXY_OAUTH_BIND:-0.0.0.0}:51121:51121" # Antigravity
+      - "${CLI_PROXY_OAUTH_BIND:-0.0.0.0}:11451:11451" # iFlow
     volumes:
       - ${CLI_PROXY_CONFIG_PATH:-./config.yaml}:/CLIProxyAPI/config.yaml
       - ${CLI_PROXY_AUTH_PATH:-./auths}:/root/.cli-proxy-api

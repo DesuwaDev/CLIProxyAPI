@@ -10,8 +10,8 @@ Docker Engine と Docker Compose v2 を用意してください。amd64 / arm64 
 
 ```bash
 mkdir -p cliproxyapi && cd cliproxyapi
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/docker-compose.yml -o docker-compose.yml
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/config.docker.example.yaml -o config.yaml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/docker-compose.yml -o docker-compose.yml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/config.docker.example.yaml -o config.yaml
 mkdir -p auths logs data plugins
 ```
 
@@ -22,7 +22,7 @@ docker compose pull
 docker compose up -d
 ```
 
-管理画面は `http://SERVER_IP:8317/management.html`、API は `http://SERVER_IP:8317/v1` です。既存の OAuth ファイルは管理画面からアップロードできます。OAuth ログインにコールバックが必要な場合は、Compose にコメントされている対応ポートを有効にし、ブラウザーから到達できるようにしてください。
+管理画面は `http://SERVER_IP:8317/management.html`、API は `http://SERVER_IP:8317/v1` です。既存の OAuth ファイルをアップロードするか、管理画面から OAuth ログインを開始できます。コールバックポートはすべて初期状態で公開されます：Codex `1455`、Gemini `8085`、Claude `54545`、Antigravity `51121`、iFlow `11451`。リモート環境では、ブラウザーの localhost コールバックをサーバーへ転送するか、管理画面のコールバック手動送信機能を使用してください。
 
 イメージは `ghcr.io/desuwadev/cliproxyapi:v2026.9.1` です。[Compose](docker-compose.yml) と[設定例](config.docker.example.yaml)を参照してください。`config.yaml`、`auths/`、統計と設定を保存する `data/`、導入済み `plugins/` を保持してください。
 

@@ -2,7 +2,7 @@
 
 [English](README.md) · [上游项目](https://github.com/router-for-me/CLIProxyAPI) · [版本发布](https://github.com/DesuwaDev/CLIProxyAPI/releases)
 
-在 CPA 原版面板中加入请求与费用统计、账号和 Key 管理、价格同步、请求诊断，以及可开关的 Codex 请求控制。一个进程、一个端口，不需要外挂面板。
+在 CPA 原版面板中加入请求与费用统计、账号和 Key 管理、价格同步、请求诊断，以及可开关的 Codex 请求控制。一个进程、一个面板，不需要外挂面板。
 
 ## Docker Compose 部署
 
@@ -12,8 +12,8 @@
 
 ```bash
 mkdir -p cliproxyapi && cd cliproxyapi
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/docker-compose.yml -o docker-compose.yml
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/config.docker.example.yaml -o config.yaml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/docker-compose.yml -o docker-compose.yml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/config.docker.example.yaml -o config.yaml
 mkdir -p auths logs data plugins
 ```
 
@@ -34,7 +34,7 @@ docker compose logs --tail=100 -f
 
 打开 `http://服务器IP:8317/management.html`，用管理密钥登录。客户端 API 地址填写 `http://服务器IP:8317/v1`，使用 `api-keys` 中的 Key。
 
-在面板中上传已有 OAuth 账号文件即可使用。如果选择需要回调端口的 OAuth 网页登录，按提供方启用 Compose 中注释的端口；远程服务器登录还需让浏览器的 localhost 回调能到达服务器，例如使用端口转发。
+可在面板中上传已有 OAuth 账号文件，也可发起 OAuth 登录。Compose 默认开放全部回调端口：Codex `1455`、Gemini `8085`、Claude `54545`、Antigravity `51121`、iFlow `11451`，无需取消注释。远程服务器登录时，浏览器的 localhost 回调仍需通过端口转发到达服务器，或使用面板提供的手动提交回调功能。
 
 镜像：`ghcr.io/desuwadev/cliproxyapi:v2026.9.1`。统计与管理默认可用，账号自动处置、请求审查和每账号指纹策略仍需明确开启。
 

@@ -2,7 +2,7 @@
 
 [中文部署教程](README_CN.md) · [Upstream](https://github.com/router-for-me/CLIProxyAPI) · [Releases](https://github.com/DesuwaDev/CLIProxyAPI/releases)
 
-This fork includes usage/cost statistics, account and key controls, pricing, diagnostics, and optional Codex request controls in CPA's original management panel. One process, one port, no sidecar.
+This fork includes usage/cost statistics, account and key controls, pricing, diagnostics, and optional Codex request controls in CPA's original management panel. One process, one panel, no sidecar.
 
 ## Docker Compose
 
@@ -10,8 +10,8 @@ Requires Docker Engine and Docker Compose v2. The image supports native `amd64` 
 
 ```bash
 mkdir -p cliproxyapi && cd cliproxyapi
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/docker-compose.yml -o docker-compose.yml
-curl -fL https://raw.githubusercontent.com/DesuwaDev/CLIProxyAPI/v2026.9.1/config.docker.example.yaml -o config.yaml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/docker-compose.yml -o docker-compose.yml
+curl -fL https://github.com/DesuwaDev/CLIProxyAPI/releases/download/v2026.9.1/config.docker.example.yaml -o config.yaml
 mkdir -p auths logs data plugins
 ```
 
@@ -25,7 +25,7 @@ docker compose logs --tail=100 -f
 
 - Management panel: `http://YOUR_SERVER_IP:8317/management.html` — use the management key.
 - API base URL: `http://YOUR_SERVER_IP:8317/v1` — use a client API key.
-- Upload existing OAuth account files in the panel. Enable the appropriate commented callback port in Compose if you use an OAuth login flow that requires it.
+- Upload existing OAuth account files or start OAuth login in the panel. Compose publishes all callback ports by default: Codex `1455`, Gemini `8085`, Claude `54545`, Antigravity `51121`, and iFlow `11451`. For remote deployments, a browser's localhost callback still needs forwarding to the server, or use the panel's callback submission option when available.
 - The versioned image is `ghcr.io/desuwadev/cliproxyapi:v2026.9.1`; Docker selects the architecture automatically.
 
 [Compose file](docker-compose.yml) · [Minimal Docker config](config.docker.example.yaml) · [Full config reference](config.example.yaml)
