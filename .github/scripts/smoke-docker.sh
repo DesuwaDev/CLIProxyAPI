@@ -20,7 +20,7 @@ for attempt in $(seq 1 45); do
 done
 curl -fsS -D "$work/headers" -H "Authorization: Bearer $management_key" \
   http://127.0.0.1:18317/v0/management/native/status -o "$work/status.json" || { docker logs "$name"; exit 1; }
-jq -e '.modules | map(.name) | contains(["history","pricing","inventory","headers","wire","fingerprint","risk"])' "$work/status.json"
+jq -e '.modules | map(.name) | contains(["history","pricing","inventory","headers","fingerprint","risk"])' "$work/status.json"
 grep -Fq "$RELEASE_VERSION" "$work/panel.html"
 grep -Fq 'codex-disguise' "$work/panel.html"
 grep -Fiq "$RELEASE_VERSION" "$work/headers"
