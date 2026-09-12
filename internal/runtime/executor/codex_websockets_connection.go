@@ -34,11 +34,6 @@ func (e *CodexWebsocketsExecutor) dialCodexWebsocket(ctx context.Context, auth *
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	if wire := cliproxyexecutor.WireTransportFrom(ctx); wire != nil && wire.DialTLS != nil {
-		// The wire profile owns TCP/proxy dialing and the TLS handshake.
-		dialer.NetDialTLSContext = wire.DialTLS
-		dialer.Proxy = nil
-	}
 	conn, resp, err := dialer.DialContext(ctx, wsURL, headers)
 	if err != nil {
 		cliproxyexecutor.MarkUpstreamAttempt(ctx)

@@ -7,10 +7,8 @@ import { ModuleSettingsPage } from './ModuleSettingsPage';
 import { RiskControlPage } from './RiskControlPage';
 import { InventoryPage } from './InventoryPage';
 import { DiagnosticsPage } from './DiagnosticsPage';
-import { CodexDisguisePage } from './CodexDisguisePage';
 
 export const nativeManagementRoutes = [
-  { path: '/codex-disguise', element: <CodexDisguisePage /> },
   { path: '/risk-control', element: <RiskControlPage /> },
   { path: '/credential-usage', element: <InventoryPage /> },
   { path: '/usage', element: <UsagePage /> },

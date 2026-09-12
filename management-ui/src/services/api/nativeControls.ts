@@ -3,20 +3,6 @@ import { apiClient } from './client';
 export type LimitPolicy = { rpm: number; concurrency: number };
 export type FingerprintMode = 'off' | 'device' | 'session' | 'full';
 export type HeaderMode = 'off' | 'clean' | 'client';
-export type WireMode = 'off' | 'codex';
-export type WirePolicy = { mode: WireMode; compress: boolean; cookies: boolean; routing_hint: boolean };
-export type WireStatus = {
-  policy: WirePolicy;
-  connections: {
-    open: number;
-    cookies: number;
-    requests: number;
-    reused: number;
-    compressed: number;
-    dials: number;
-    last_error: string;
-  };
-};
 export type ControlScope = 'client' | 'credential';
 export type CodexVersionSettings = { manual_version: string; automatic: boolean };
 export type CodexVersionStatus = {
@@ -43,36 +29,6 @@ export const nativeControlsApi = {
     apiClient.put<CodexVersionStatus>('/native/headers/client-version', settings, { signal }),
   syncCodexVersion: (signal?: AbortSignal) =>
     apiClient.post<CodexVersionStatus>('/native/headers/client-version/sync', {}, { signal }),
-  async wire(id: string, signal?: AbortSignal): Promise<WireStatus> {
-    const v = await apiClient.get<Wire>(`/native/wire/${encodeURIComponent(id)}`, { signal });
-    const p = obj(v.policy),
-      c = obj(v.connections);
-    return {
-      policy: {
-        mode: p.mode === 'codex' ? 'codex' : 'off',
-        compress: p.compress === true,
-        cookies: p.cookies === true,
-        routing_hint: p.routing_hint === true,
-      },
-      connections: {
-        open: num(c.open),
-        cookies: num(c.cookies),
-        requests: num(c.requests),
-        reused: num(c.reused),
-        compressed: num(c.compressed),
-        dials: num(c.dials),
-        last_error: str(c.last_error),
-      },
-    };
-  },
-  setWire: (id: string, policy: WirePolicy, signal?: AbortSignal) =>
-    apiClient.put(`/native/wire/${encodeURIComponent(id)}`, policy, { signal }),
-  async wireProfile(signal?: AbortSignal): Promise<Record<string, string>> {
-    const v = await apiClient.get<Wire>('/native/wire/profile', { signal });
-    const out: Record<string, string> = {};
-    for (const [k, val] of Object.entries(obj(v.profile))) out[k] = str(val);
-    return out;
-  },
   async identity(scope: ControlScope, target: string, signal?: AbortSignal) {
     const v = await apiClient.post<Wire>(
       '/native/identity',
@@ -84,7 +40,6 @@ export const nativeControlsApi = {
       provider: str(v.provider),
       fingerprint: v.fingerprint === true,
       headers: v.headers === true,
-      wire: v.wire === true,
     };
   },
   async limits(scope: ControlScope, id: string, signal?: AbortSignal) {

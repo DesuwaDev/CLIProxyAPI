@@ -151,9 +151,6 @@ func (s *Service) applyConfigRuntime(ctx context.Context, commit configCommit, s
 	if !s.applyManagerConfig(ctx, commit) {
 		return false
 	}
-	if s.nativeManagement != nil {
-		s.nativeManagement.SetGlobalProxyURL(strings.TrimSpace(cfg.ProxyURL))
-	}
 	if errContext := ctx.Err(); errContext != nil {
 		return false
 	}

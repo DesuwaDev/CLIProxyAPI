@@ -16,7 +16,6 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/config"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/httpwire"
 	cliproxyauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
-	cliproxyexecutor "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/proxyutil"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
@@ -382,10 +381,6 @@ func NewUtlsHTTPClient(ctx context.Context, cfg *config.Config, auth *cliproxyau
 	}
 
 	var chromeRT http.RoundTripper = newUtlsRoundTripper(proxyURL)
-	// An opted-in wire profile replaces the Chrome transport for chatgpt.com only.
-	if wire := cliproxyexecutor.WireTransportFrom(ctx); wire != nil && wire.RoundTripper != nil {
-		chromeRT = wire.RoundTripper
-	}
 	var anthropicRT http.RoundTripper = cachedClaudeCodeRoundTripper(proxyURL)
 	var standardTransport http.RoundTripper = http.DefaultTransport
 	if proxyURL != "" {
@@ -393,9 +388,7 @@ func NewUtlsHTTPClient(ctx context.Context, cfg *config.Config, auth *cliproxyau
 			standardTransport = transport
 		}
 	} else if ctxRoundTripper != nil {
-		if wire := cliproxyexecutor.WireTransportFrom(ctx); wire == nil || wire.RoundTripper == nil {
-			chromeRT = ctxRoundTripper
-		}
+		chromeRT = ctxRoundTripper
 		anthropicRT = ctxRoundTripper
 		standardTransport = ctxRoundTripper
 	}

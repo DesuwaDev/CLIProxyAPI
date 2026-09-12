@@ -2,7 +2,6 @@ package native
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
@@ -12,7 +11,6 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/native/risk"
 	auth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
 	ex "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/executor"
-	"github.com/tidwall/gjson"
 )
 
 type riskObservationKey struct{}
@@ -22,7 +20,6 @@ type Identity struct {
 	Provider    string `json:"provider"`
 	Fingerprint bool   `json:"fingerprint"`
 	Headers     bool   `json:"headers"`
-	Wire        bool   `json:"wire"`
 }
 
 // SetIdentityLookup is called once by the host before routes and execution start.
@@ -30,7 +27,6 @@ func (r *Runtime) SetIdentityLookup(lookup func(string) (Identity, bool)) {
 	r.identityLookup = lookup
 	r.fingerprint.Eligible = func(id string) bool { v, ok := lookup(id); return ok && v.Fingerprint }
 	r.headers.Eligible = func(id string) bool { v, ok := lookup(id); return ok && v.Headers }
-	r.wire.Eligible = func(id string) bool { v, ok := lookup(id); return ok && v.Wire }
 }
 func (r *Runtime) registerIdentity(g *gin.RouterGroup) {
 	g.POST("/identity", func(c *gin.Context) {
@@ -109,26 +105,6 @@ func (r *Runtime) BeforeExecute(ctx context.Context, a *auth.Auth, req ex.Reques
 			ctx = ex.WithOutboundHeaderTransform(ctx, transform)
 		}
 	}
-	var wireHeaders ex.OutboundHeaderTransform
-	if r.enabled("wire") && a.Provider == "codex" && a.AuthKind() == auth.AuthKindOAuth {
-		proxyURL := a.ProxyURL
-		if proxyURL == "" {
-			r.mu.RLock()
-			proxyURL = r.globalProxyURL
-			r.mu.RUnlock()
-		}
-		if rt := r.wire.Transport(a.Index, proxyURL); rt != nil {
-			ctx = ex.WithWireTransport(ctx, &ex.WireTransport{RoundTripper: rt, DialTLS: r.wire.WebsocketDialer(a.Index, proxyURL)})
-		}
-		model := req.Model
-		if requested, ok := opts.Metadata[ex.RequestedModelMetadataKey].(string); ok && requested != "" {
-			model = requested
-		}
-		if transform := r.wire.HeaderTransform(a.Index, model, wireServiceTier(req.Payload)); transform != nil {
-			wireHeaders = transform
-			ctx = ex.WithOutboundHeaderTransform(ctx, chainHeaderTransforms(ctx, transform))
-		}
-	}
 	if r.enabled("fingerprint") && a.Provider == "codex" && a.AuthKind() == auth.AuthKindOAuth {
 		original := opts.OriginalRequest
 		if len(original) == 0 {
@@ -139,51 +115,10 @@ func (r *Runtime) BeforeExecute(ctx context.Context, a *auth.Auth, req ex.Reques
 			caller, _ = req.Metadata[ex.CallerScopeMetadataKey].(string)
 		}
 		if transform := r.fingerprint.Transform(a.Index, caller, original, opts.Headers); transform != nil {
-			if wireHeaders != nil {
-				// Fingerprint convergence rewrites session headers after the header
-				// transforms ran; re-apply wire normalization so only the CLI's
-				// hyphenated session-id reaches the upstream.
-				inner := transform
-				transform = func(h http.Header, body []byte) ([]byte, error) {
-					next, err := inner(h, body)
-					if err == nil {
-						wireHeaders(h)
-					}
-					return next, err
-				}
-			}
 			ctx = ex.WithOutboundTransform(ctx, transform)
 		}
 	}
 	return ctx, release, nil
-}
-
-// SetGlobalProxyURL records the process-wide proxy so credentials without their
-// own proxy-url dial the wire profile through the same route CPA uses.
-func (r *Runtime) SetGlobalProxyURL(proxyURL string) {
-	r.mu.Lock()
-	r.globalProxyURL = proxyURL
-	r.mu.Unlock()
-}
-
-// chainHeaderTransforms runs an already attached header transform (the headers
-// module) before next, so wire normalization sees the final identity headers.
-func chainHeaderTransforms(ctx context.Context, next ex.OutboundHeaderTransform) ex.OutboundHeaderTransform {
-	prev := ex.OutboundHeaderTransformFrom(ctx)
-	if prev == nil {
-		return next
-	}
-	return func(h http.Header) {
-		prev(h)
-		next(h)
-	}
-}
-
-func wireServiceTier(payload []byte) string {
-	if len(payload) == 0 {
-		return ""
-	}
-	return gjson.GetBytes(payload, "service_tier").String()
 }
 
 func riskInput(ctx context.Context, a *auth.Auth, req ex.Request, opts ex.Options) risk.Input {

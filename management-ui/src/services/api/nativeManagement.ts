@@ -8,7 +8,6 @@ export type NativeModuleName =
   | 'limits'
   | 'fingerprint'
   | 'headers'
-  | 'wire'
   | 'risk'
   | 'inventory';
 export type NativeStatus = {
@@ -177,7 +176,6 @@ export const nativeManagementApi = {
         'limits',
         'fingerprint',
         'headers',
-        'wire',
         'risk',
         'inventory',
       ].includes(str(m.name))

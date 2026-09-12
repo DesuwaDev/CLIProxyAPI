@@ -17,7 +17,6 @@ The original proxy/executors remain responsible for model traffic and scheduling
 | `limits` | Persisted per-key/credential admission policies and process-local rolling counters |
 | `fingerprint` | Opt-in Codex OAuth account identity seeds and outbound transforms |
 | `headers` | Opt-in Codex OAuth proxy-header cleanup and preservation of supplied client identity |
-| `wire` | Opt-in Codex OAuth transport that reproduces the official CLI's TLS ClientHello, HTTP/2 preface and header order, zstd request bodies and cookie jar |
 | `risk` | Opt-in preflight content audit, reviewer nodes, events and scoped TTL blocks |
 | `inventory` | Durable lifetime usage totals, account/key profiles and quota-window estimates |
 | `controls.go` | Host identity lookup and execution-policy adapter |
@@ -135,8 +134,6 @@ middleware under `/v0/management/native`:
 - `GET/PUT /headers/:target`, policy `{ "mode": "off" | "clean" | "client" }`
 - `GET/PUT /headers/client-version`, settings `{ "manual_version": "", "automatic": false }`
 - `POST /headers/client-version/sync`, fetch the official stable CLI version without downloading software
-- `GET/PUT /wire/:target`, policy `{ "mode": "off" | "codex", "compress": true, "cookies": true, "routing_hint": true }`; GET also returns per-credential connection counters
-- `GET /wire/profile`, the compiled-in profile summary (client version, TLS, HTTP/2, body, cookies, WebSocket); read-only
 - `GET /inventory`, `GET/PUT /inventory/:scope/:target`, `PUT /inventory/windows/:target`
 - `GET/PUT /risk/config`, `GET /risk/status`, `GET /risk/events`, `GET /risk/blocks`
 - `DELETE /risk/blocks/:kind/:target`, `POST /risk/test`
@@ -296,53 +293,6 @@ through the existing SafeResponseHeaders allowlist in home_concurrency.go; no
 arbitrary upstream headers are promoted to trusted headers.
 
 
-## Wire profile integration
-
-The `wire` module changes only how bytes reach `chatgpt.com` for a Codex OAuth
-credential that opted in. It does not change the request body, model, prompt,
-identifiers or account, and it never applies to API-key credentials or other
-providers. Software identity stays with the `headers` module; device and
-conversation identifiers stay with the `fingerprint` module. The intended stack
-for own-use accounts is `routing.session-affinity: true`, headers mode `client`,
-fingerprint mode `device` and wire mode `codex`. Fingerprint modes `session` and
-`full` rewrite conversation identifiers and are not part of that stack.
-
-Mode `codex` reproduces codex-cli 0.154.0 (reqwest 0.12.28 / rustls 0.23.36 /
-hyper 1.8.1 / h2 0.4.16): the rustls ClientHello with per-connection randomized
-extension order and no session resumption, the hyper SETTINGS and WINDOW_UPDATE
-preface, the `/responses` header order, h2-style HPACK indexing, a libzstd-shaped
-zstd request body, a per-credential cookie jar and, when the client did not send
-one, `x-codex-routing-hint` derived from the requested model. When the host
-config sets `codex.force-residency: "us"`, the executor injects the official
-client's `x-openai-internal-codex-residency: us` header (HTTP and WebSocket)
-for Codex OAuth credentials unless the downstream client already sent one; the
-wire header order table carries its captured slot. WebSocket dials use
-the same TLS profile without ALPN and the CLI's upgrade header order.
-
-The management UI exposes all of this on one page, `/codex-disguise` (sidebar
-group "control", shown whenever the native runtime is present). It lists every
-Codex OAuth credential with its headers, fingerprint and wire modes, shows the
-three module toggles and the `routing.session-affinity` switch, and offers
-"apply recommended to all" / "turn off for all accounts". The session-affinity
-switch rewrites only that one key in `config.yaml` after re-reading the file.
-The per-credential editors in the auth-file sheet remain as the detailed view.
-
-Wiring: `internal/native/controls.go` attaches a `WireTransport` and a header
-transform in `BeforeExecute`; `sdk/cliproxy/executor/wire_transport.go` carries
-them on the context; `helps.NewUtlsHTTPClient` uses the round tripper for
-`chatgpt.com` only, and `codex_websockets_connection.go` uses the TLS dialer. The
-header normalization runs again after the fingerprint transform because that
-transform rewrites session headers. Mode `off` leaves every existing transport
-path untouched, and disabling the module at runtime removes the hook for
-subsequent attempts.
-
-The profile is version-pinned. When the official client's network stack changes,
-recapture with `cmd/codex_wire_capture` (listener), decode with `chparse`, and
-compare with `selftest`; the values in `ProfileSummary()` and the tables in
-`internal/native/wire` are the only places to update. Verified on 2026-09-11:
-the real edge accepted GET and zstd POST over HTTP/2 through Cloudflare, and the
-ClientHello, HTTP/2 preface, header order and zstd frame header matched the CLI
-byte for byte across twelve consecutive connections.
 
 ## Risk and inventory integration
 
