@@ -54,22 +54,34 @@ const rowMatches = (r: Row) =>
   r.wire.cookies &&
   r.wire.routing_hint;
 
-async function readAffinity(signal?: AbortSignal): Promise<boolean> {
+async function readConfigFlags(
+  signal?: AbortSignal
+): Promise<{ affinity: boolean; residency: boolean }> {
   const yaml = await configFileApi.fetchConfigYaml();
   if (signal?.aborted) throw new DOMException('aborted', 'AbortError');
   const doc = parseDocument(yaml);
-  const v = doc.getIn(['routing', 'session-affinity']);
-  return v === true;
+  return {
+    affinity: doc.getIn(['routing', 'session-affinity']) === true,
+    residency: String(doc.getIn(['codex', 'force-residency']) ?? '').toLowerCase() === 'us',
+  };
 }
 
+// Re-read right before writing so we never clobber concurrent edits with a
+// stale document; only the one key is changed.
 async function writeAffinity(value: boolean) {
-  // Re-read right before writing so we never clobber concurrent edits with a
-  // stale document; only the one key is changed.
   const yaml = await configFileApi.fetchConfigYaml();
   const doc = parseDocument(yaml);
   if (value) doc.setIn(['routing', 'session-affinity'], true);
   else if (doc.hasIn(['routing', 'session-affinity']))
     doc.setIn(['routing', 'session-affinity'], false);
+  await configFileApi.saveConfigYaml(doc.toString());
+}
+
+async function writeResidency(value: boolean) {
+  const yaml = await configFileApi.fetchConfigYaml();
+  const doc = parseDocument(yaml);
+  if (value) doc.setIn(['codex', 'force-residency'], 'us');
+  else if (doc.hasIn(['codex', 'force-residency'])) doc.deleteIn(['codex', 'force-residency']);
   await configFileApi.saveConfigYaml(doc.toString());
 }
 
@@ -81,7 +93,7 @@ export function CodexDisguisePage() {
 
   const load = useCallback(
     async (signal: AbortSignal) => {
-      const [listing, affinity] = await Promise.all([authFilesApi.list(), readAffinity(signal)]);
+      const [listing, flags] = await Promise.all([authFilesApi.list(), readConfigFlags(signal)]);
       const codex = listing.files.filter(isCodex);
       const rows: Row[] = [];
       for (const f of codex) {
@@ -114,7 +126,7 @@ export function CodexDisguisePage() {
           lastError: wire.connections.last_error,
         });
       }
-      return { rows, affinity, total: codex.length };
+      return { rows, affinity: flags.affinity, residency: flags.residency, total: codex.length };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [native.status]
@@ -130,6 +142,7 @@ export function CodexDisguisePage() {
   const rows = useMemo(() => query.data?.rows ?? [], [query.data]);
   const matching = useMemo(() => rows.filter(rowMatches).length, [rows]);
   const affinity = query.data?.affinity ?? false;
+  const residency = query.data?.residency ?? false;
   const allGood = allModulesOn && affinity && rows.length > 0 && matching === rows.length;
 
   async function run(work: (signal: AbortSignal) => Promise<void>, done?: string) {
@@ -247,6 +260,17 @@ export function CodexDisguisePage() {
                 onChange={(v) => void run(() => writeAffinity(v))}
               />
               <small>{t('native.disguise_affinity_hint')}</small>
+            </div>
+            <div className={styles.metric}>
+              <p>{t('native.disguise_residency')}</p>
+              <ToggleSwitch
+                checked={residency}
+                disabled={locked}
+                ariaLabel={t('native.disguise_residency')}
+                label={residency ? t('native.disguise_on') : t('native.disguise_off')}
+                onChange={(v) => void run(() => writeResidency(v))}
+              />
+              <small>{t('native.disguise_residency_hint')}</small>
             </div>
           </div>
           {message && <p role="status">{message}</p>}

@@ -1994,6 +1994,8 @@
     "disguise_off": "Выкл",
     "disguise_affinity": "Привязка сессий",
     "disguise_affinity_hint": "Записывает routing.session-affinity в config.yaml. Один диалог остаётся на одном аккаунте вместо ротации.",
+    "disguise_residency": "Принудительная резидентность US",
+    "disguise_residency_hint": "Записывает codex.force-residency в config.yaml. Добавляет заголовок официального клиента x-openai-internal-codex-residency: us, закрепляя запросы за маршрутизацией с резидентностью данных в США. Выключено — передаётся только то, что прислал клиент.",
     "disguise_accounts_title": "Аккаунты Codex OAuth ({{count}})",
     "disguise_accounts_hint": "Одна строка — один аккаунт. Изменение сохраняется сразу. Рекомендуется: «Убрать прокси-данные + сохранить идентичность клиента», «Только ID устройства», «Профиль официального Codex CLI».",
     "disguise_accounts_empty": "Учётные данные Codex OAuth не найдены. Сначала войдите в аккаунт Codex в разделе Auth Files.",

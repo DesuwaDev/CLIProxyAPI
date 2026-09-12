@@ -312,7 +312,11 @@ hyper 1.8.1 / h2 0.4.16): the rustls ClientHello with per-connection randomized
 extension order and no session resumption, the hyper SETTINGS and WINDOW_UPDATE
 preface, the `/responses` header order, h2-style HPACK indexing, a libzstd-shaped
 zstd request body, a per-credential cookie jar and, when the client did not send
-one, `x-codex-routing-hint` derived from the requested model. WebSocket dials use
+one, `x-codex-routing-hint` derived from the requested model. When the host
+config sets `codex.force-residency: "us"`, the executor injects the official
+client's `x-openai-internal-codex-residency: us` header (HTTP and WebSocket)
+for Codex OAuth credentials unless the downstream client already sent one; the
+wire header order table carries its captured slot. WebSocket dials use
 the same TLS profile without ALPN and the CLI's upgrade header order.
 
 The management UI exposes all of this on one page, `/codex-disguise` (sidebar

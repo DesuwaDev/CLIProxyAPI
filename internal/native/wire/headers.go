@@ -15,6 +15,7 @@ var httpHeaderOrder = []string{
 	"x-codex-window-id",
 	"x-codex-turn-metadata",
 	"x-openai-internal-codex-responses-lite",
+	"x-openai-internal-codex-residency",
 	"x-codex-routing-hint",
 	"x-client-request-id",
 	"session-id",
@@ -51,6 +52,7 @@ var websocketHeaderOrder = []string{
 	"thread-id",
 	"x-codex-window-id",
 	"x-codex-turn-metadata",
+	"x-openai-internal-codex-residency",
 	"x-codex-routing-hint",
 	"sec-websocket-extensions",
 }

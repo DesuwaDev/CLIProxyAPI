@@ -2004,6 +2004,8 @@
     "disguise_off": "关",
     "disguise_affinity": "会话粘性路由",
     "disguise_affinity_hint": "写入 config.yaml 的 routing.session-affinity。同一个对话固定走同一个账号，不再轮询。",
+    "disguise_residency": "强制 US 驻留路由",
+    "disguise_residency_hint": "写入 config.yaml 的 codex.force-residency。给上游请求补官方客户端的 x-openai-internal-codex-residency: us 头，把请求钉在美国数据驻留路由上。关闭时只透传客户端自己发的值。",
     "disguise_accounts_title": "Codex OAuth 账号（{{count}} 个）",
     "disguise_accounts_hint": "一行一个账号，改动即保存。推荐值：“清理代理信息＋沿用客户端标识”、“只统一设备编号”、“官方 Codex CLI 指纹”。",
     "disguise_accounts_empty": "没有找到 Codex OAuth 凭证。先在“认证文件”里登录一个 Codex 账号。",

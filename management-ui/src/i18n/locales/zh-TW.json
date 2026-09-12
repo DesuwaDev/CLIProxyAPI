@@ -2030,6 +2030,8 @@
     "disguise_off": "關",
     "disguise_affinity": "工作階段黏性路由",
     "disguise_affinity_hint": "寫入 config.yaml 的 routing.session-affinity。同一個對話固定走同一個帳號，不再輪詢。",
+    "disguise_residency": "強制 US 駐留路由",
+    "disguise_residency_hint": "寫入 config.yaml 的 codex.force-residency。為上游請求補官方用戶端的 x-openai-internal-codex-residency: us 標頭，把請求釘在美國資料駐留路由上。關閉時只透傳用戶端自己送的值。",
     "disguise_accounts_title": "Codex OAuth 帳號（{{count}} 個）",
     "disguise_accounts_hint": "一行一個帳號，改動即儲存。建議值：「清理代理資訊＋沿用用戶端標識」、「只統一裝置編號」、「官方 Codex CLI 指紋」。",
     "disguise_accounts_empty": "沒有找到 Codex OAuth 憑證。先在「認證檔案」裡登入一個 Codex 帳號。",

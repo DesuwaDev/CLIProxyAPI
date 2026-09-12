@@ -29,7 +29,38 @@ const (
 	codexDefaultImageToolModel = "gpt-image-2"
 	codexResponsesLiteHeader   = "X-OpenAI-Internal-Codex-Responses-Lite"
 	codexResponsesLiteMetadata = "client_metadata.ws_request_header_x_openai_internal_codex_responses_lite"
+	// codexResidencyHeader is the official client's data-residency routing header,
+	// emitted by codex_login::auth::default_client when enforce_residency is set.
+	codexResidencyHeader = "X-Openai-Internal-Codex-Residency"
 )
+
+// codexForceResidencyValue returns the validated residency value to inject, or
+// empty when disabled. The official client's ResidencyRequirement enum only
+// knows "us", so anything else is ignored rather than sent upstream.
+func codexForceResidencyValue(cfg *config.Config) string {
+	if cfg == nil {
+		return ""
+	}
+	value := strings.ToLower(strings.TrimSpace(cfg.Codex.ForceResidency))
+	if value == "us" {
+		return value
+	}
+	return ""
+}
+
+// applyCodexForceResidency injects the residency header for Codex OAuth
+// credentials when configured and the client did not already send one.
+func applyCodexForceResidency(headers http.Header, cfg *config.Config, auth *cliproxyauth.Auth) {
+	if headers == nil || codexAuthUsesAPIKey(auth) {
+		return
+	}
+	if strings.TrimSpace(headers.Get(codexResidencyHeader)) != "" {
+		return
+	}
+	if value := codexForceResidencyValue(cfg); value != "" {
+		headers.Set(codexResidencyHeader, value)
+	}
+}
 
 var dataTag = []byte("data:")
 
@@ -340,6 +371,8 @@ func applyCodexHeadersFromSources(r *http.Request, auth *cliproxyauth.Auth, toke
 	misc.EnsureHeader(r.Header, ginHeaders, "Thread-Id", "")
 	misc.EnsureHeader(r.Header, ginHeaders, "Session-Id", "")
 	misc.EnsureHeader(r.Header, ginHeaders, "X-Openai-Internal-Codex-Responses-Lite", "")
+	misc.EnsureHeader(r.Header, ginHeaders, codexResidencyHeader, "")
+	applyCodexForceResidency(r.Header, cfg, auth)
 
 	cfgUserAgent, _ := codexHeaderDefaults(cfg, auth)
 	ensureHeaderWithConfigPrecedence(r.Header, ginHeaders, "User-Agent", cfgUserAgent, codexUserAgent)

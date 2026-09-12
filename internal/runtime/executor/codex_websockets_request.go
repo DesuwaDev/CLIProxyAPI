@@ -88,6 +88,8 @@ func applyCodexWebsocketHeaders(ctx context.Context, headers http.Header, auth *
 	misc.EnsureHeader(headers, ginHeaders, "x-codex-turn-metadata", "")
 	misc.EnsureHeader(headers, ginHeaders, "x-client-request-id", "")
 	misc.EnsureHeader(headers, ginHeaders, "x-responsesapi-include-timing-metrics", "")
+	misc.EnsureHeader(headers, ginHeaders, codexResidencyHeader, "")
+	applyCodexForceResidency(headers, cfg, auth)
 	misc.EnsureHeader(headers, ginHeaders, "Version", "")
 	if isAPIKey {
 		ensureHeaderWithPriority(headers, ginHeaders, "User-Agent", "", "")

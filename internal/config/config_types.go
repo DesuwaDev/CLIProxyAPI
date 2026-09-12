@@ -181,6 +181,12 @@ type CodexConfig struct {
 	// ModelLevelCooling scopes Codex usage_limit_reached quota cooldowns to the requested model
 	// rather than cooling down the entire credential across all sibling models.
 	ModelLevelCooling bool `yaml:"model-level-cooling" json:"model-level-cooling"`
+	// ForceResidency injects the official client's data-residency routing header
+	// (x-openai-internal-codex-residency) on upstream Codex OAuth requests when the
+	// downstream client did not send one. The official client emits it when its
+	// enforce_residency requirement is set; "us" is the only value the client knows.
+	// Empty disables injection. A client-supplied header is always passed through as-is.
+	ForceResidency string `yaml:"force-residency,omitempty" json:"force-residency,omitempty"`
 	// LiveMediaRelay terminates and relays Codex Live WebRTC media in this process.
 	LiveMediaRelay CodexLiveMediaRelayConfig `yaml:"live-media-relay" json:"live-media-relay"`
 }

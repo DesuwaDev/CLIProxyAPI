@@ -2004,6 +2004,8 @@
     "disguise_off": "Off",
     "disguise_affinity": "Session affinity",
     "disguise_affinity_hint": "Writes routing.session-affinity in config.yaml. One conversation stays on one account instead of rotating.",
+    "disguise_residency": "Force US residency",
+    "disguise_residency_hint": "Writes codex.force-residency in config.yaml. Adds the official client's x-openai-internal-codex-residency: us header so requests are pinned to US data-residency routing. Off passes through whatever the client sends.",
     "disguise_accounts_title": "Codex OAuth accounts ({{count}})",
     "disguise_accounts_hint": "Each row is one account. Changing a value saves immediately. Recommended: “Strip proxy info + keep client identity”, “Device ID only”, “Official Codex CLI profile”.",
     "disguise_accounts_empty": "No Codex OAuth credentials found. Log in to a Codex account under Auth Files first.",
